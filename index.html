@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -743,6 +742,33 @@
 </head>
 <body>
 
+ <div id="optionsModal" style="position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; height: 100%; background: rgba(0,0,0,0.5); z-index: 7000; display: none; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: white; padding: 25px; border-radius: 24px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.15); font-family: 'Quicksand', sans-serif; position: relative;">
+        <span onclick="closeOptionsModal()" style="position: absolute; top: 15px; right: 20px; font-weight: bold; cursor: pointer; color: var(--rodape);">X</span>
+        <h4 id="optionsModalTitle" style="color: var(--rodape); font-size: 18px; font-weight: 900; margin-bottom: 15px; text-align: center;">Escolha uma opção</h4>
+        
+        <div id="optionsContainer" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;"></div>
+        
+        <button id="btnConfirmOption" class="btn-add" style="background: var(--accent-dark); color: white; margin-top: 10px;">Confirmar e Adicionar</button>
+    </div>
+</div>
+    
+<div id="productDetailModal" style="position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; height: 100%; background: rgba(0,0,0,0.6); z-index: 8000; display: none; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: white; padding: 25px; border-radius: 24px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.15); font-family: 'Quicksand', sans-serif; text-align: center;">
+        <img id="detailModalImg" src="" style="width: 100%; height: 200px; object-fit: cover; border-radius: 16px; margin-bottom: 15px;">
+        <h4 id="detailModalTitle" style="color: var(--rodape); font-size: 18px; font-weight: 900; margin-bottom: 10px;"></h4>
+        <p id="detailModalDescription" style="color: #654f53; font-size: 14px; margin-bottom: 20px; line-height: 1.5; text-align: left;"></p>
+        <button onclick="closeProductDetailModal()" class="btn-add" style="background: var(--verde); color: white; margin-top: 10px;">Ok</button>
+    </div>
+</div>
+  
+    
+    
+    
+    
+    
+    
+    
     <div class="cart-btn" onclick="openCart()" id="floatingCart">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
         <span id="cart-count" style="position:absolute; top:-5px; right:-5px; background:var(--red); color:white; border-radius:50%; width:20px; height:20px; font-size:12px; display:flex; align-items:center; justify-content:center; font-weight:bold; display:none;">0</span>
@@ -942,6 +968,10 @@
         const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRWAYesjo-68FhU8iq_imTIvYnrQLPadVr1HN05wZimtpBkoIHKc-zl9AglUb71gT6KO54eQCnH_rZK/pub?output=csv';
         let configHorario = { aberto: "18:00", fechado: "23:59" };
         let botaoAtivoPlanilha = false; 
+    
+        let currentProductForModal = null;
+        let currentEventForModal = null;
+
 
         async function fetchSheetData() {
             try {
@@ -1018,30 +1048,75 @@
                             element = div;
                         }
                             
-                            else if (idNum >= 300 && idNum <= 399) {
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+else if (idNum >= 300 && idNum <= 399) {
     const container = document.getElementById('lista-produtos-vertical');
     const div = document.createElement('div');
     div.id = 'prod-' + id;
-    
-    // Estilo idêntico ao layout de lista de itens (um embaixo do outro)
     div.className = 'cart-item'; 
     div.style.margin = '0';
     
+    // Captura a palavra customizada da coluna D (índice 3)
+    const palavraColunaD = cleanRow[3] ? cleanRow[3] : "Tipos:";
+    
+    // NOVO: Captura o texto de explicação/ingredientes da coluna G (índice 6)
+    const explicacaoG = cleanRow[6] ? cleanRow[6] : "Ingredientes não informados.";
+    div.setAttribute('data-explicacao', explicacaoG);
+    
+    // NOVO: Pega o nome e o valor começando da coluna H e I por diante (índice 7 em diante)
+    const dadosGerais = cleanRow.slice(7).filter(op => op !== "");
+    const opcoesAgrupadas = [];
+    
+    // Agrupa de duas em duas colunas (Texto da Opção, Preço da Opção)
+    for (let i = 0; i < dadosGerais.length; i += 2) {
+        if (dadosGerais[i] && dadosGerais[i+1]) {
+            opcoesAgrupadas.push({
+                texto: dadosGerais[i],
+                preco: dadosGerais[i+1]
+            });
+        }
+    }
+    
+    div.setAttribute('data-options', JSON.stringify(opcoesAgrupadas));
+    
     div.innerHTML = `
         <img style="width: 90px; height: 90px;" src="" class="cart-item-img prod-img">
-        <div class="cart-item-info">
+        <div class="cart-item-info" style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
             <strong class="prod-nome" style="font-size:15px; color:var(--rodape);">...</strong>
-            <div class="cart-item-row">
-                <span class="prod-preco-novo" style="color: #2a9d8f; font-weight:700; font-size:14px;">...</span>
-                <div class="cart-controls">
-                    <button class="btn-add" onclick="addToCartByElement('prod-${id}', event)" style="padding: 6px 15px; margin-top: 0; font-size: 13px; width: auto;">Adicionar</button>
+            <div class="cart-item-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px;">
+                <span style="font-size: 11px; color: #2a9d8f; white-space: nowrap;"><strong>${palavraColunaD}</strong></span>
+                <span class="prod-preco-novo" style="color: #2a9d8f; font-weight:700; font-size:14px; display:none;">...</span>
+                <div class="cart-controls" style="margin-top: 0;">
+                    <button class="btn-add" onclick="openOptionsModal('${id}', event)" style="padding: 6px 15px; margin-top: 0; font-size: 13px; width: auto; background: var(--orange); white-space: nowrap;">Escolher</button>
                 </div>
             </div>
         </div>
     `;
+
     container.appendChild(div);
     element = div;
 }
+
+
+   
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
                          else if (idNum >= 200 && idNum <= 299) {
                              
     // CRIA A CÓPIA PEQUENA EXCLUSIVA PARA DENTRO DO CARRINHO                  
@@ -1652,7 +1727,140 @@ function enviarPedidoWhatsApp() {
     window.open(`https://wa.me/5562995679219?text=${mensagem}`, '_blank');
 }
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+function openOptionsModal(id, event) {
+    currentProductForModal = id;
+    currentEventForModal = event;
+    
+    const el = document.getElementById('prod-' + id);
+    const nome = el.querySelector('.prod-nome').innerText;
+    const imgUrl = el.querySelector('.prod-img').src;
+    const opcoes = JSON.parse(el.getAttribute('data-options') || "[]");
+    
+    // Atualiza o título do modal com o nome do produto e adiciona o botão Visualizar logo abaixo dele
+    const cardPrincipal = document.getElementById('prod-' + id);
+    let descricaoInfo = cardPrincipal ? cardPrincipal.getAttribute('data-explicacao') : "";
 
+     // Atualiza o título com design limpo, centralizado e botão de ingredientes focado
+    document.getElementById('optionsModalTitle').innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%;">
+            <img src="${imgUrl}" style="width:100%; height:140px; object-fit:cover; border-radius:16px; margin-bottom:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <strong style="font-size: 18px; color: var(--rodape); margin-bottom: 6px;">${nome}</strong>
+            
+            <div style="margin-top: 4px; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                <span style="font-size: 8px; color: var(--red); font-weight: 700; letter-spacing: 0.5px;">Clique para ver os:</span>
+                <button onclick="event.stopPropagation(); openProductDetailModal('${nome}', \`${descricaoInfo}\`)" style="background: #e3f2fd; color: #2b6cb0; border: none; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(43,108,176,0.15); transition: transform 0.2s;">✨ Ingredientes</button>
+            </div>
+        </div>
+    `;
+
+
+    
+    const container = document.getElementById('optionsContainer');
+    container.innerHTML = '';
+    
+    if(opcoes.length === 0) {
+        container.innerHTML = '<p style="font-size:14px; text-align:center;">Nenhuma opção cadastrada na planilha para este item.</p>';
+        return;
+    }
+
+
+opcoes.forEach((opcao, idx) => {
+    let nomeOpcao = opcao.texto || "Opção";
+    let precoOpcao = opcao.preco || "0,00";
+
+    container.innerHTML += `
+        <div class="metodo-card option-card" data-nome="${nomeOpcao}" data-preco="${precoOpcao}" style="padding: 12px; margin: 0; display:flex; flex-direction:row; justify-content:space-between; align-items:center; width: 100%; gap: 10px; cursor: default;">
+            
+            <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+                <span class="metodo-titulo" style="font-size: 14px; margin:0; line-height: 1.2;">${nomeOpcao}</span>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-weight:700; color:#2a9d8f; font-size:14px; white-space: nowrap;">R$ ${precoOpcao.replace('R$', '').trim()}</span>
+                
+                <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.04); padding: 2px; border-radius: 8px;">
+                    <button type="button" onclick="event.stopPropagation(); let q = this.nextElementSibling; let v = parseInt(q.innerText); if(v > 0) { q.innerText = v - 1; if(v - 1 === 0) this.closest('.option-card').classList.remove('active'); }" style="background: none; border: none; width: 24px; height: 24px; font-weight: bold; cursor: pointer; font-size: 14px;">-</button>
+                    <span class="qtd-opcao" style="font-weight: 700; min-width: 12px; text-align: center; font-size: 14px;">0</span>
+                    <button type="button" onclick="event.stopPropagation(); let q = this.previousElementSibling; let v = parseInt(q.innerText); q.innerText = v + 1; this.closest('.option-card').classList.add('active');" style="background: none; border: none; width: 24px; height: 24px; font-weight: bold; cursor: pointer; font-size: 14px;">+</button>
+                </div>
+            </div>
+        
+        </div>
+    `;
+});
+
+
+
+
+    
+    document.getElementById('optionsModal').style.display = 'flex';
+    document.body.classList.add('modal-open');
+}
+
+function selectProductOption(element, texto, preco) {
+    // toggle adiciona se não tiver, e remove se já tiver a classe active
+    element.classList.toggle('active');
+}
+
+function closeOptionsModal() {
+    document.getElementById('optionsModal').style.display = 'none';
+    document.body.classList.remove('modal-open');
+}
+
+function openProductDetailModal(titulo, descricao) {
+    // Captura a imagem atual do produto principal que já está aberto no modal de opções
+    const mainImgSrc = document.querySelector('#optionsModalTitle img').src;
+    
+    document.getElementById('detailModalImg').src = mainImgSrc;
+    document.getElementById('detailModalTitle').innerText = titulo;
+    document.getElementById('detailModalDescription').innerText = descricao;
+    
+    document.getElementById('productDetailModal').style.display = 'flex';
+}
+
+function closeProductDetailModal() {
+    document.getElementById('productDetailModal').style.display = 'none';
+}
+    
+document.getElementById('btnConfirmOption').addEventListener('click', function() {
+    const cardsSelecionados = document.querySelectorAll('.option-card.active');
+    
+    if(cardsSelecionados.length === 0) return alert("Por favor, escolha pelo menos uma opção com quantidade maior que zero antes de continuar!");
+    
+    if(currentProductForModal) {
+        const el = document.getElementById('prod-' + currentProductForModal);
+        const nameOriginal = el.querySelector('.prod-nome').innerText;
+        const img = el.querySelector('.prod-img').src;
+        
+        cardsSelecionados.forEach(card => {
+            const textoSelecionado = card.getAttribute('data-nome');
+            const precoTexto = card.getAttribute('data-preco');
+            const qtd = parseInt(card.querySelector('.qtd-opcao').innerText) || 0;
+            
+            const nameComOpcao = `${nameOriginal} (${textoSelecionado})`;
+            const price = parseFloat(precoTexto.replace('R$ ', '').replace(',', '.').trim()) || 0;
+            
+            // Loop para adicionar a quantidade exata selecionada no contador
+            for (let i = 0; i < qtd; i++) {
+                addToCart(nameComOpcao, price, img, currentEventForModal);
+            }
+        });
+        
+        closeOptionsModal();
+    }
+});
 
     </script>
 </body>
