@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -965,7 +966,7 @@
 
 
     <script>
-        const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRWAYesjo-68FhU8iq_imTIvYnrQLPadVr1HN05wZimtpBkoIHKc-zl9AglUb71gT6KO54eQCnH_rZK/pub?output=csv';
+        const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQC1j8GB6JlP-C8uBiLR7_gQwK49H87KGP_cRDuK6JYMBPz9v_pVA8C7p7qE29Om5X2IkIFMdTWEb_a/pub?output=csv';
         let configHorario = { aberto: "18:00", fechado: "23:59" };
         let botaoAtivoPlanilha = false; 
     
@@ -984,30 +985,45 @@
                 
                 const lines = data.split(/\r?\n/);
 
-                lines.forEach((line, index) => {
-                if (line.includes(';')) {
-                    row = line.split(';');
-                      } else {
-                    row = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                      }
+              lines.forEach((line, index) => {
+    // Ignora linhas vazias
+    if (!line.trim()) return;
 
-                    
-                    const cleanRow = row.map(cell => cell.replace(/^"|"$|'/g, '').trim());
+    let row;
+    if (line.includes(';')) {
+        row = line.split(';');
+    } else {
+        row = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+    }
 
-                    if (index === 0 && cleanRow[1]?.toLowerCase() === "id") return;
+    const cleanRow = row.map(cell => cell.replace(/^"|"$|'/g, '').trim());
 
-                    const id = cleanRow[1]; 
-                    const img = cleanRow[2]; 
-                    const precoReal = cleanRow[3]; 
-                    const nome = cleanRow[4];      
+    // Se a primeira linha for o cabeçalho, pula ela de forma correta olhando o índice do ID
+    if (index === 0 && (cleanRow[0]?.toLowerCase() === "id" || cleanRow[1]?.toLowerCase() === "id")) return;
 
-                    if (!id) return;
+    // Alinhamento exato com as colunas da sua planilha pública (A=Ação, B=ID, C=Imagem, D=Texto/Preço, E=Nome/Preço...)
+    const acao  = cleanRow[0]; // Coluna A
+    const id    = cleanRow[1]; // Coluna B
+    const img   = cleanRow[2]; // Coluna C
 
-                    if (id === "9000") {
-                        configHorario.aberto = img; 
-                        configHorario.fechado = precoReal;
-                        return;
-                    }
+    if (!id) return;
+
+    // Definição padrão do Nome e Preço base para os produtos normais (100-299 e 1000+)
+    let precoReal = cleanRow[3]; // Coluna D
+    let nome      = cleanRow[4]; // Coluna E
+
+    // Caso seja o ID de configuração do horário
+    if (id === "9000") {
+        configHorario.aberto = img; 
+        configHorario.fechado = precoReal;
+        return;
+    }
+
+    // Se a linha contiver o comando de exclusão vindo do painel, pula e não mostra no site
+    if (acao === "EXCLUIR") return;
+
+
+                  
 
                     let element = document.getElementById('prod-' + id);
                     
