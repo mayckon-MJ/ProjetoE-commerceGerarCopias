@@ -1387,8 +1387,7 @@
             "60.00": "https://mpago.la/exemplo60reais"
         };
         
-        
-        function enviarPedidoWhatsApp() {
+                function enviarPedidoWhatsApp() {
             const nome = document.getElementById('nomeCliente').value;
             if(!nome) return alert("Por favor, digite seu nome.");
             
@@ -1403,43 +1402,33 @@
             });
 
             let totalChave = total.toFixed(2); 
-            let linkPagamento = LINKS_PAGAMENTO_FIXOS[totalChave];
-            let blocoPagamento = "";
 
-            if (cart.length > 0) {
-                if (linkPagamento) {
-                    blocoPagamento = `*Link para Pagamento (Valor Exato):*%0A${linkPagamento}%0A%0A`;
-                } else {
-                    blocoPagamento = `*Pagamento:*%0A_Aguarde o atendente enviar o link para o valor de R$ ${totalChave.replace('.', ',')}_%0A%0A`;
-                }
-            }
-
-            let mensagem = `🛎️🔔🛎️ - Delícias da Ely*%0A%0A`;
+            let mensagem = `✅ *NOVO PEDIDO (PAGO VIA PIX)* ✅%0A`;
             mensagem += `*Cliente:* ${nome}%0A`;
             mensagem += `*Localização:* ${userLocation}%0A`;
             mensagem += `*Forma de Entrega/Retirada:* ${metodo}%0A%0A`;
-            
-            if(cart.length > 0) {
-                mensagem += `*Itens:*%0A${itensTexto}%0A`;
-                mensagem += `*Total: R$ ${totalChave.replace('.', ',')}*%0A%0A`;
-                mensagem += blocoPagamento;
-            } else {
-                mensagem += `_Cliente iniciando contato para verificar taxas ou fazer orçamento._%0A%0A`;
-            }
-            
-            if(!botaoAtivoPlanilha) {
-                mensagem += `*Sobre a entrega:*%0A`;
-                mensagem += `Opção selecionada pelo cliente: *${metodo}*`;
-            }
+            mensagem += `*Itens:*%0A${itensTexto}%0A`;
+            mensagem += `*Total Pago: R$ ${totalChave.replace('.', ',')}*%0A%0A`;
+            mensagem += `ESTAMOS AGUARDANDO O COMPROVANTE`;
 
             cart = [];
             renderCart();
+            
             document.body.classList.remove('modal-open');
             document.getElementById('finalizarModal').style.display = 'none';
             document.getElementById('cartModal').style.display = 'none';
 
+            document.getElementById('containerAlertaSucesso').style.display = 'none'; 
+            document.getElementById('blocoPix').style.display = 'none'; 
+            document.getElementById('btnGerarPix').style.display = 'block'; 
+            document.getElementById('btnGerarPix').innerText = "Pagar com Pix"; 
+            document.getElementById('statusPagamento').innerText = "⏳ Aguardando pagamento..."; 
+            document.getElementById('nomeCliente').value = ""; 
+
             window.open(`https://wa.me/5562995679219?text=${mensagem}`, '_blank');
         }
+
+        
     
         let checkoutInterval; 
         const URL_DO_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyec-i_NOpRNqyBO0Gerys5VPHKt_hV8KHqjAVF4tX3-alWVJyUr28ByM8ioa6fHO8/exec";
