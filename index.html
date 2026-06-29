@@ -1365,7 +1365,8 @@
             btn.innerText = "Buscando localização...";
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position) => {
-                    userLocation = `http://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+                    userLocation = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
+        
                     btn.innerText = "Tudo Ok";
                     btn.style.background = "var(--green)";
                     btn.style.color = "white";
