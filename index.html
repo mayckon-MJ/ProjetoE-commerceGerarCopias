@@ -717,12 +717,13 @@
             <button class="btn-add" onclick="addToCartByElement('prod-2000', event)">Adicionar ao carrinho</button>
         </div>
     </div>
-
-    <div class="section-name" style="text-align: center; font-weight: 700;">Nossos Bombons ✨</div>
+    
+    <div class="section-name" id="titulo-bebidas" style="text-align: center; font-weight: 700;">Carregando... ✨</div>
     
     <div class="carousel-container" id="carrossel-bolos"></div>
     
-    <div class="section-name" style="text-align: center; font-weight: 700;">Nossas Variedades ✨</div>  
+    <div class="section-name" id="titulo-variedades" style="text-align: center; font-weight: 700;">Carregando... ✨</div>
+    
     <div id="lista-produtos-vertical" style="display: flex; flex-direction: column; gap: 14px; padding: 0 20px;"></div>
 
     <div id="cartModal" class="modal-cart">
@@ -933,6 +934,23 @@
                         }
                         return;
                     }
+                    
+                        if (id === "1") {
+                        const tituloBebidas = document.getElementById('titulo-bebidas');
+                        if (tituloBebidas && img) { // <--- Mudado de nome para img
+                            tituloBebidas.innerHTML = `${img} ✨`; // <--- Mudado de nome para img
+                        }
+                        return;
+                     }
+                        if (id === "2") {
+                        const tituloVariedades = document.getElementById('titulo-variedades');
+                        if (tituloVariedades && img) { 
+                            tituloVariedades.innerHTML = `${img} ✨`; 
+                        }
+                        return;
+                     }
+
+
 
 
 
