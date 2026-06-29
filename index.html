@@ -79,11 +79,12 @@
 
         /* --- HEADER COM DESIGN MODERNO --- */
         .header {
-            background: url('https://i.ibb.co/VYKz2k68/99052.jpg') no-repeat center top;
+            background-repeat: no-repeat;
+            background-position: center top;
             background-size: 100% auto;
-            padding-top: 90px;
+            padding-top: 220px;
             text-align: center;
-            border-radius: 0 0 32px 32px;
+            border-radius: 50px 50px;
             position: relative;
             display: flex;
             flex-direction: column;
@@ -91,6 +92,7 @@
             background-color: #fff;
             box-shadow: 0 4px 20px rgba(0,0,0,0.02);
         }
+
 
         .logo-circle {
             width: 96px;
@@ -923,6 +925,15 @@
                     }
                         return;
                     }
+                    
+                        if (id === "9") {
+                        const headerEl = document.querySelector('.header');
+                        if (headerEl && img && img.startsWith('http')) {
+                            headerEl.style.backgroundImage = `url('${img}')`;
+                        }
+                        return;
+                    }
+
 
 
                     if (acao === "EXCLUIR") return;
@@ -1659,3 +1670,4 @@
     </script>
 </body>
 </html>
+
