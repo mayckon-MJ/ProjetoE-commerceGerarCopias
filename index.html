@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -757,8 +758,7 @@
         Atenção: Entrega somente por Uber/99 ou Retirada pessoalmente no Estabelecimento.
         </div>
 
-        <div id="areaNome" style="margin-top: 20px;">
-                        
+        <div id="areaNome" style="display:none; margin-top: 20px;">
         <div style="display: flex; justify-content: center; margin-bottom: 15px;">
         <img style="width: 55px; height: 55px;" src="https://i.ibb.co/cKtrGWjZ/99715.png" alt="logo pix">
         </div>
@@ -773,7 +773,7 @@
             </p>
             
             <div class="metodo-container">
-                <div class="metodo-card" id="cardFazerEntrega" onclick="selecionarMetodo('Nós entregamos', this)">                   
+                <div class="metodo-card" id="cardFazerEntrega" style="display: none;" onclick="selecionarMetodo('Nós entregamos', this)">
                     <div style="display: flex; justify-content: center; margin-bottom: 15px;">                            
                     <img style="width: 55px; height: 55px;" src="https://i.ibb.co/LdqrpS3c/99885.png" alt="logo pix">  
                     </div>
@@ -1278,6 +1278,26 @@
             document.getElementById('cartModal').style.display = 'none'; 
             document.body.classList.remove('modal-open');
         }
+        
+        function abrirFinalizar() {
+            const blocoLoc = document.getElementById('blocoLocalizacao');
+            const blocoSemEntrega = document.getElementById('blocoSemEntrega');
+            const areaNome = document.getElementById('areaNome');
+
+            if (botaoAtivoPlanilha) {
+                blocoLoc.style.display = "block";
+                blocoSemEntrega.style.display = "none";
+                areaNome.style.display = "none"; 
+            } else {
+                blocoLoc.style.display = "none";
+                blocoSemEntrega.style.display = "block";
+                areaNome.style.display = "block";
+                userLocation = "Não aplicável (Retirada/Sem entrega)";
+            }
+
+            document.getElementById('finalizarModal').style.display = 'flex';
+            document.body.classList.add('modal-open');
+        }
 
         function abrirPelaNav(tipo) {
             if(tipo === 'localizacao') {
@@ -1297,26 +1317,6 @@
                 document.body.classList.add('modal-open');
             }
         }
-        
-                function abrirFinalizar() {
-            const blocoSemEntrega = document.getElementById('blocoSemEntrega');
-            const areaNome = document.getElementById('areaNome');
-            const blocoLoc = document.getElementById('blocoLocalizacao');
-
-            // Mantém o bloco de localização oculto por padrão ao abrir o modal
-            blocoLoc.style.display = "none"; 
-            areaNome.style.display = "block"; // Força o campo de nome a ficar ativo sempre
-
-            if (botaoAtivoPlanilha) {
-                blocoSemEntrega.style.display = "none";
-            } else {
-                blocoSemEntrega.style.display = "block";
-                userLocation = "Não aplicável (Retirada/Sem entrega)";
-            }
-
-            document.getElementById('finalizarModal').style.display = 'flex';
-            document.body.classList.add('modal-open');
-        }
 
         function fecharFinalizar() { 
             document.getElementById('finalizarModal').style.display = 'none'; 
@@ -1324,9 +1324,7 @@
                 document.body.classList.remove('modal-open');
             }
             
-            // REMOVA OU APAGUE A LINHA ABAIXO se ela existir, mantendo o card ativo:
-            // document.getElementById('cardFazerEntrega').style.display = "none"; 
-            
+            document.getElementById('cardFazerEntrega').style.display = "none"; 
             document.getElementById('blocoPix').style.display = 'none'; 
             document.getElementById('btnGerarPix').style.display = 'block'; 
             document.getElementById('btnGerarPix').innerText = "Pagar com Pix"; 
@@ -1340,33 +1338,12 @@
             }
         }
 
-        function selecionarMetodo(valor, elemento) {
-            document.getElementById('metodoRetirada').value = valor;
-            document.querySelectorAll('.metodo-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            elemento.classList.add('active');
-
-            const blocoLoc = document.getElementById('blocoLocalizacao');
-            
-            // Nova lógica: Ao clicar em 'Nós entregamos', exibe o alerta de localização
-            if (valor === 'Nós entregamos' && botaoAtivoPlanilha) {
-                blocoLoc.style.display = "block";
-                // Rola o modal para o topo para garantir que o cliente veja o alerta de localização imediatamente
-                document.getElementById('finalizarModal').scrollTop = 0;
-            } else {
-                blocoLoc.style.display = "none";
-            }
-        }
-
-
         function pegarLocalizacao() {
             const btn = document.getElementById('btnLoc');
             btn.innerText = "Buscando localização...";
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position) => {
-                    userLocation = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
-        
+                    userLocation = `http://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
                     btn.innerText = "Tudo Ok";
                     btn.style.background = "var(--green)";
                     btn.style.color = "white";
@@ -1388,7 +1365,15 @@
             "60.00": "https://mpago.la/exemplo60reais"
         };
         
-                function enviarPedidoWhatsApp() {
+        function selecionarMetodo(valor, elemento) {
+            document.getElementById('metodoRetirada').value = valor;
+            document.querySelectorAll('.metodo-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            elemento.classList.add('active');
+        }
+
+        function enviarPedidoWhatsApp() {
             const nome = document.getElementById('nomeCliente').value;
             if(!nome) return alert("Por favor, digite seu nome.");
             
@@ -1403,33 +1388,43 @@
             });
 
             let totalChave = total.toFixed(2); 
+            let linkPagamento = LINKS_PAGAMENTO_FIXOS[totalChave];
+            let blocoPagamento = "";
 
-            let mensagem = `✅ *NOVO PEDIDO (PAGO VIA PIX)* ✅%0A`;
+            if (cart.length > 0) {
+                if (linkPagamento) {
+                    blocoPagamento = `*Link para Pagamento (Valor Exato):*%0A${linkPagamento}%0A%0A`;
+                } else {
+                    blocoPagamento = `*Pagamento:*%0A_Aguarde o atendente enviar o link para o valor de R$ ${totalChave.replace('.', ',')}_%0A%0A`;
+                }
+            }
+
+            let mensagem = `🛎️🔔🛎️ - Delícias da Ely*%0A%0A`;
             mensagem += `*Cliente:* ${nome}%0A`;
             mensagem += `*Localização:* ${userLocation}%0A`;
             mensagem += `*Forma de Entrega/Retirada:* ${metodo}%0A%0A`;
-            mensagem += `*Itens:*%0A${itensTexto}%0A`;
-            mensagem += `*Total Pago: R$ ${totalChave.replace('.', ',')}*%0A%0A`;
-            mensagem += `ESTAMOS AGUARDANDO O COMPROVANTE`;
+            
+            if(cart.length > 0) {
+                mensagem += `*Itens:*%0A${itensTexto}%0A`;
+                mensagem += `*Total: R$ ${totalChave.replace('.', ',')}*%0A%0A`;
+                mensagem += blocoPagamento;
+            } else {
+                mensagem += `_Cliente iniciando contato para verificar taxas ou fazer orçamento._%0A%0A`;
+            }
+            
+            if(!botaoAtivoPlanilha) {
+                mensagem += `*Sobre a entrega:*%0A`;
+                mensagem += `Opção selecionada pelo cliente: *${metodo}*`;
+            }
 
             cart = [];
             renderCart();
-            
             document.body.classList.remove('modal-open');
             document.getElementById('finalizarModal').style.display = 'none';
             document.getElementById('cartModal').style.display = 'none';
 
-            document.getElementById('containerAlertaSucesso').style.display = 'none'; 
-            document.getElementById('blocoPix').style.display = 'none'; 
-            document.getElementById('btnGerarPix').style.display = 'block'; 
-            document.getElementById('btnGerarPix').innerText = "Pagar com Pix"; 
-            document.getElementById('statusPagamento').innerText = "⏳ Aguardando pagamento..."; 
-            document.getElementById('nomeCliente').value = ""; 
-
             window.open(`https://wa.me/5562995679219?text=${mensagem}`, '_blank');
         }
-
-        
     
         let checkoutInterval; 
         const URL_DO_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyec-i_NOpRNqyBO0Gerys5VPHKt_hV8KHqjAVF4tX3-alWVJyUr28ByM8ioa6fHO8/exec";
