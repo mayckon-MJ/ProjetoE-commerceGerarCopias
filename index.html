@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -683,10 +682,12 @@
         <span id="cart-count" style="position:absolute; top:-5px; right:-5px; background:var(--primary); color:white; border-radius:50%; width:18px; height:18px; font-size:11px; display:flex; align-items:center; justify-content:center; font-weight:bold; display:none;">0</span>
     </div>
 
-    <div class="header">
+    <div class="header">        
         <div class="logo-circle">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyiE6cOUfaP9F-l-bziquUfvzasrYRPCZQ3eNI4G1ubodJMTL7ocnhlWY&s=10" alt="Logo">
+            <!--Coloque o ID 8 na colu B da planilha e o link da imagem na coluna C-->
+            <img id="foto-perfil" src="https://i.ibb.co/9H2DwS46/114125.png" alt="Logo">
         </div>
+
 
         <div id="status-badge" class="status-badge status-aberto">
             <div id="status-dot" class="dot dot-green"></div>
@@ -915,6 +916,14 @@
                         configHorario.fechado = precoReal;
                         return;
                     }
+                    if (id === "8") {
+                        const fotoPerfil = document.getElementById('foto-perfil');
+                        if (fotoPerfil && img && img.startsWith('http')) {
+                        fotoPerfil.src = img;
+                    }
+                        return;
+                    }
+
 
                     if (acao === "EXCLUIR") return;
 
