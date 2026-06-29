@@ -772,13 +772,14 @@
             </p>
             
             <div class="metodo-container">
-                <div class="metodo-card" id="cardFazerEntrega" style="display: none;" onclick="selecionarMetodo('Nós entregamos', this)">
+                <div class="metodo-card" id="cardFazerEntrega" onclick="selecionarMetodo('Nós entregamos', this)">
                     <div style="display: flex; justify-content: center; margin-bottom: 15px;">                            
                     <img style="width: 55px; height: 55px;" src="https://i.ibb.co/LdqrpS3c/99885.png" alt="logo pix">  
                     </div>
                     <span class="metodo-titulo">Nós entregamos</span>
                     <span class="metodo-sub">Motoboy da loja</span>
                 </div>
+ 
                 
                 <div class="metodo-card active" onclick="selecionarMetodo('Vou buscar pessoalmente', this)">
                     <div style="display: flex; justify-content: center; margin-bottom: none;">
@@ -1359,8 +1360,7 @@
             if(document.getElementById('cartModal').style.display !== 'flex') {
                 document.body.classList.remove('modal-open');
             }
-            
-            document.getElementById('cardFazerEntrega').style.display = "none"; 
+                     
             document.getElementById('blocoPix').style.display = 'none'; 
             document.getElementById('btnGerarPix').style.display = 'block'; 
             document.getElementById('btnGerarPix').innerText = "Pagar com Pix"; 
