@@ -748,10 +748,10 @@
         <div style="text-align: right; width: 100%;"><span class="close-modal" onclick="fecharFinalizar()">✕ Fechar</span></div>
         <h2 style="color: var(--dark); margin-bottom: 20px; font-weight: 700; margin-top: 15px; text-align: left; font-size: 24px; letter-spacing: -0.5px;">Finalizar Pedido</h2>
         
-        <div id="blocoLocalizacao">
-            <p style="margin-bottom:15px; font-weight:600; color: var(--text-muted); text-align: left; font-size: 14px; line-height: 1.5;">Para calcularmos o valor da entrega de forma precisa, precisamos obter sua localização atual:</p>
-            <button id="btnLoc" class="btn-add" onclick="pegarLocalizacao()" style="background: var(--primary-light); color: var(--primary); box-shadow: none; margin-bottom: 20px;">Confirmar Localização Exata</button>
-        </div>
+        <div id="blocoLocalizacao" style="display: none;">
+        <p style="margin-bottom:15px; font-weight:600; color: var(--text-muted); text-align: left; font-size: 14px; line-height: 1.5;">Para calcularmos o valor da entrega de forma precisa, precisamos obter sua localização atual:</p>
+        <button id="btnLoc" class="btn-add" onclick="pegarLocalizacao()" style="background: var(--primary-light); color: var(--primary); box-shadow: none; margin-bottom: 20px;">Confirmar Localização Exata</button>
+        </div>       
 
         <div id="blocoSemEntrega" style="display: none; background: #fff5f5; color: #c62828; padding: 14px; border-radius: 12px; margin: 0 auto 20px auto; max-width: 450px; font-weight: 600; text-align: center; font-size: 14px; border: 1px solid #ffdde1; box-shadow: 0 2px 4px rgba(198, 40, 40, 0.05);">
         Atenção: Entrega somente por Uber/99 ou Retirada pessoalmente no Estabelecimento.
@@ -1278,17 +1278,18 @@
             document.body.classList.remove('modal-open');
         }
         
-        function abrirFinalizar() {
-            const blocoLoc = document.getElementById('blocoLocalizacao');
+                function abrirFinalizar() {
+            // Ajustado para que o botão de localização NÃO apareça direto ao abrir
             const blocoSemEntrega = document.getElementById('blocoSemEntrega');
             const areaNome = document.getElementById('areaNome');
+            const blocoLoc = document.getElementById('blocoLocalizacao');
+
+            blocoLoc.style.display = "none"; // Garante que começa escondido
 
             if (botaoAtivoPlanilha) {
-                blocoLoc.style.display = "block";
                 blocoSemEntrega.style.display = "none";
                 areaNome.style.display = "none"; 
             } else {
-                blocoLoc.style.display = "none";
                 blocoSemEntrega.style.display = "block";
                 areaNome.style.display = "block";
                 userLocation = "Não aplicável (Retirada/Sem entrega)";
@@ -1297,6 +1298,42 @@
             document.getElementById('finalizarModal').style.display = 'flex';
             document.body.classList.add('modal-open');
         }
+
+        function selecionarMetodo(valor, elemento) {
+            document.getElementById('metodoRetirada').value = valor;
+            document.querySelectorAll('.metodo-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            elemento.classList.add('active');
+
+            // NOVA LÓGICA: Exibe a localização APENAS se clicar em 'Nós entregamos'
+            const blocoLoc = document.getElementById('blocoLocalizacao');
+            if (valor === 'Nós entregamos' && botaoAtivoPlanilha) {
+                blocoLoc.style.display = "block";
+            } else {
+                blocoLoc.style.display = "none";
+            }
+        }
+
+        function pegarLocalizacao() {
+            const btn = document.getElementById('btnLoc');
+            btn.innerText = "Buscando localização...";
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    userLocation = `http://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+                    btn.innerText = "Tudo Ok";
+                    btn.style.background = "var(--green)";
+                    btn.style.color = "white";
+                    
+                    // Modificado: Agora libera o formulário de nome após confirmar a localização
+                    document.getElementById('areaNome').style.display = "block";
+                }, () => {
+                    alert("Ative a localização para continuar.");
+                    btn.innerText = "Confirmar Localização Exata";
+                });
+            }
+        }
+
 
         function abrirPelaNav(tipo) {
             if(tipo === 'localizacao') {
