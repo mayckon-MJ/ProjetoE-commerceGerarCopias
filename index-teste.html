@@ -656,6 +656,22 @@
         }
         .box-aviso-pix h4 { color: var(--dark); font-size: 18px; font-weight: 700; margin: 12px 0; }
         .box-aviso-pix p { color: var(--text-muted); font-size: 14px; margin-bottom: 8px; text-align: left; font-weight: 600; }
+    
+    /* --- ALERTA EXPLICATIVO DE LOCALIZAÇÃO --- */
+.modal-aviso-localizacao {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 450px; height: 100%;
+    background: rgba(0, 0, 0, 0.4); z-index: 6500;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.box-aviso-localizacao {
+    background: white; padding: 25px; border-radius: 20px;
+    text-align: center; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    font-family: 'Quicksand', sans-serif; position: relative;
+}
+.box-aviso-localizacao h4 { color: var(--primary); font-size: 19px; font-weight: 700; margin-bottom: 15px; }
+.box-aviso-localizacao p { color: var(--text-muted); font-size: 14px; margin-bottom: 12px; text-align: left; font-weight: 600; line-height: 1.5; }
+
     </style>
 </head>
 <body>
@@ -810,6 +826,21 @@
                 <button class="btn-add" onclick="copiarPix()" style="background: #2e7d32; color: white; margin-top: 12px; box-shadow: 0 4px 12px rgba(46,125,50,0.15);">Copiar Código Pix</button>
                 <p id="statusPagamento" style="margin-top: 15px; font-weight: 700; color: #2e7d32; text-align: center; animation: blink 1s infinite; font-size: 14px;">⏳ Aguardando pagamento...<br><span style="font-weight: 500; font-size: 12px; color: #556b57;">Volte aqui assim que realizar o pagamento.</span></p>
             </div>
+        
+            <div id="modalAvisoLocalizacao" class="modal-aviso-localizacao">
+                <div class="box-aviso-localizacao">
+                <span onclick="cancelarAvisoLocalizacao()" style="position: absolute; top: 15px; right: 20px; font-weight: bold; cursor: pointer; color: var(--text-muted); font-size: 18px;">✕</span>
+                 <div style="display: flex; justify-content: center; margin-bottom: 15px;">                            
+                    <img style="width: 55px; height: 55px;" src="https://i.ibb.co/LdqrpS3c/99885.png" alt="logo pix">  
+                 </div>
+                <h4>Nós Entregamos</h4>
+                <span style="color: red; font-size: 12px; padding: 8px;"> Por quê precisamos da sua localização:</span>      
+                <p><strong>1.</strong> Para calcularmos o valor da entrega (taxa de motoboy) de forma justa e correta para a sua região.</p>
+                <p><strong>2.</strong> Para que o nosso entregador encontre o seu endereço com facilidade e o mais rápido possível, garantindo que o seu pedido chegue quentinho e rápido.</p>
+                <button class="btn-add" onclick="aceitarAvisoLocalizacao()" style="background:var(--primary); color:white; margin-top:15px; width:100%;">Confirmar Localização Exata</button>
+                </div>
+            </div>
+
 
             <button class="btn-add" id="btnGerarPix" onclick="mostrarInstrucoesPix()" style="background: var(--primary); color: white; margin-top: 25px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                 Pagar com Pix
@@ -1319,24 +1350,25 @@
         }
         
         function abrirFinalizar() {
-            const blocoLoc = document.getElementById('blocoLocalizacao');
-            const blocoSemEntrega = document.getElementById('blocoSemEntrega');
-            const areaNome = document.getElementById('areaNome');
+    // Exibe sempre o campo "Digite seu nome"
+    document.getElementById('areaNome').style.display = "block";
+    
+    // O botão de localização começa escondido
+    document.getElementById('blocoLocalizacao').style.display = "none";
+    document.getElementById('blocoSemEntrega').style.display = "none";
 
-            if (botaoAtivoPlanilha) {
-                blocoLoc.style.display = "block";
-                blocoSemEntrega.style.display = "none";
-                areaNome.style.display = "none"; 
-            } else {
-                blocoLoc.style.display = "none";
-                blocoSemEntrega.style.display = "block";
-                areaNome.style.display = "block";
-                userLocation = "Não aplicável (Retirada/Sem entrega)";
-            }
+    // Mostra ou oculta a opção "Nós entregamos" baseado na planilha
+    const cardEntrega = document.getElementById('cardFazerEntrega');
+    if (botaoAtivoPlanilha) {
+        cardEntrega.style.display = "flex";
+    } else {
+        cardEntrega.style.display = "none";
+    }
 
-            document.getElementById('finalizarModal').style.display = 'flex';
-            document.body.classList.add('modal-open');
-        }
+    document.getElementById('finalizarModal').style.display = 'flex';
+    document.body.classList.add('modal-open');
+}
+
 
         function abrirPelaNav(tipo) {
             if(tipo === 'localizacao') {
@@ -1378,22 +1410,21 @@
         }
 
         function pegarLocalizacao() {
-            const btn = document.getElementById('btnLoc');
-            btn.innerText = "Buscando localização...";
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    userLocation = `http://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
-                    btn.innerText = "Tudo Ok";
-                    btn.style.background = "var(--green)";
-                    btn.style.color = "white";
-                    document.getElementById('areaNome').style.display = "block";
-                    document.getElementById('cardFazerEntrega').style.display = "flex";
-                }, () => {
-                    alert("Ative a localização para continuar.");
-                    btn.innerText = "Confirmar Localização Exata";
-                });
-            }
-        }
+    const btn = document.getElementById('btnLoc');
+    btn.innerText = "Buscando localização...";
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            userLocation = `http://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+            btn.innerText = "Tudo Ok";
+            btn.style.background = "var(--green)";
+            btn.style.color = "white";
+        }, () => {
+            alert("Ative a localização para continuar.");
+            btn.innerText = "Confirmar Localização Exata";
+        });
+    }
+}
+
 
         const LINKS_PAGAMENTO_FIXOS = {
             "15.00": "https://mpago.la/exemplo15reais",
@@ -1405,12 +1436,47 @@
         };
         
         function selecionarMetodo(valor, elemento) {
-            document.getElementById('metodoRetirada').value = valor;
-            document.querySelectorAll('.metodo-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            elemento.classList.add('active');
-        }
+    document.getElementById('metodoRetirada').value = valor;
+    document.querySelectorAll('.metodo-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    elemento.classList.add('active');
+
+    const blocoLoc = document.getElementById('blocoLocalizacao');
+    
+    if (valor === 'Nós entregamos') {
+        // Em vez de só mostrar o botão, abre o novo Alerta explicativo
+        blocoLoc.style.display = "none"; 
+        document.getElementById('modalAvisoLocalizacao').style.display = 'flex';
+    } else {
+        blocoLoc.style.display = "none";
+    }
+}
+
+function aceitarAvisoLocalizacao() {
+    // Fecha o alerta e aciona a API de geolocalização nativa
+    document.getElementById('modalAvisoLocalizacao').style.display = 'none';
+    document.getElementById('blocoLocalizacao').style.display = "block";
+    pegarLocalizacao();
+}
+
+function cancelarAvisoLocalizacao() {
+    // Fecha o alerta
+    document.getElementById('modalAvisoLocalizacao').style.display = 'none';
+    
+    // Força a seleção a voltar para a opção 'Retirar'
+    const cards = document.querySelectorAll('.metodo-card');
+    cards.forEach(card => card.classList.remove('active'));
+    
+    // O segundo card do seu HTML representa a opção 'Retirar'
+    if(cards[1]) {
+        cards[1].classList.add('active');
+    }
+    document.getElementById('metodoRetirada').value = 'Vou buscar pessoalmente';
+    document.getElementById('blocoLocalizacao').style.display = "none";
+}
+
+
 
         function enviarPedidoWhatsApp() {
             const nome = document.getElementById('nomeCliente').value;
